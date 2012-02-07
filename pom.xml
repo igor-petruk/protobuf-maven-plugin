@@ -10,7 +10,7 @@
     <groupId>com.petruk.protobuf</groupId>
     <artifactId>protobuf-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1</version>
     <name>Once Again Maven Protobuf Plugin</name>
     <url>http://github.com/igor-petruk/protobuf-maven-plugin</url>
     <properties>
