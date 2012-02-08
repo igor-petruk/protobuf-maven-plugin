@@ -31,6 +31,7 @@ import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Scanner;
 
 /**
@@ -40,12 +41,11 @@ import java.util.Scanner;
  */
 public class MyMojo extends AbstractMojo {
 
+    private static final String DEFAULT_INPUT_DIR= "/src/main/protobuf/".replace('/',File.separatorChar);
     private static final String PROTOBUF_GROUPID="com.google.protobuf";
     private static final String PROTOBUF_ARTIFACTID="protobuf-java";
     private static final String PROTOC="protoc";
     private static final String VERSION_KEY="--version";
-    private static final ProtoFileFilter PROTO_FILTER =
-            new ProtoFileFilter(".proto");
 
     /**
      * The Maven project.
@@ -102,18 +102,40 @@ public class MyMojo extends AbstractMojo {
     private DependencyTreeBuilder dependencyTreeBuilder;
 
     /**
-     * Location of the file.
+     * Input directories that have *.protoc files (or the configured extension).
+     * If none specified then src/main/proto is used.
      * @parameter expression="${run.inputDirectories}"
      * @required
      */
     private File[] inputDirectories;
 
     /**
-     * Location of the file.
-     * @parameter expression="${run.outputDirectory}"
+     * Should plugin add outputDirectory to sources that are going to be compiled
+     * @parameter expression="${run.addSources}" default-value="true"
+     * @required
+     */
+    private boolean addSources;
+
+    /**
+     * Output directory, that generated java files would be stored
+     * @parameter expression="${run.outputDirectory}" default-value="${project.build.directory}/generated-sources/protobuf"
      * @required
      */
     private File outputDirectory;
+
+    /**
+     * Default extension for protobuf files
+     * @parameter expression="${run.extension}" default-value=".proto"
+     * @required
+     */
+    private String extension;
+
+    /**
+     * Setting to "true" disables version check between 'protoc' and the protobuf library used by module
+     * @parameter expression="${run.ignoreVersions}" default-value="false"
+     * @required
+     */
+    private boolean ignoreVersions;
 
     public void execute() throws MojoExecutionException
     {
@@ -124,8 +146,10 @@ public class MyMojo extends AbstractMojo {
             throw new MojoExecutionException("Unable to find '"+PROTOC+"'");
         }
         getLog().info("'protoc' executable version "+executableVersion);
-        if (!dependencyVersion.startsWith(executableVersion)){
-            throw new MojoExecutionException("Protobuf installation version does not match Protobuf library version");
+        if (!ignoreVersions){
+            if (!dependencyVersion.startsWith(executableVersion)){
+                throw new MojoExecutionException("Protobuf installation version does not match Protobuf library version");
+            }
         }
         performProtoCompilation();
     }
@@ -136,12 +160,26 @@ public class MyMojo extends AbstractMojo {
         {
             f.mkdirs();
         }
+        if (inputDirectories.length==0){
+            File inputDir = new File(project.getBasedir().getAbsolutePath() + DEFAULT_INPUT_DIR);
+            inputDirectories = new File[]{inputDir};
+        }
+        getLog().info("Input directories:");
+        for (File input: inputDirectories){
+            getLog().info("    "+input);
+        }
+        getLog().info("Output directory: "+outputDirectory);
+        final ProtoFileFilter PROTO_FILTER = new ProtoFileFilter(extension);
+
         for (File input: inputDirectories){
             getLog().info("Directory "+input);
             File[] files = input.listFiles(PROTO_FILTER);
             for (File file: files){
                 processFile(file, outputDirectory);
             }
+        }
+        if (addSources){
+            project.addCompileSourceRoot( outputDirectory.getAbsolutePath() );
         }
     }
     
