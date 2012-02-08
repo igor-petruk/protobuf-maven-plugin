@@ -12,6 +12,7 @@
     <packaging>maven-plugin</packaging>
     <version>0.3-SNAPSHOT</version>
     <name>Once Again Maven Protobuf Plugin</name>
+    <description>Maven Plugin to compile Google Protobuf Messsage files</description>
     <url>http://github.com/igor-petruk/protobuf-maven-plugin</url>
     <properties>
         <mavenVersion>2.0.9</mavenVersion>
