@@ -1,4 +1,4 @@
-package com.petruk.protobuf;
+package com.github.igor_petruk.protobuf.maven.plugin;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -30,9 +30,7 @@ import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Scanner;
 
 /**

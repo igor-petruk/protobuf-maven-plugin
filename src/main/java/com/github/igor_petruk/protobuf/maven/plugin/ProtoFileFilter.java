@@ -1,4 +1,4 @@
-package com.petruk.protobuf;
+package com.github.igor_petruk.protobuf.maven.plugin;
 
 import java.io.File;
 import java.io.FilenameFilter;
