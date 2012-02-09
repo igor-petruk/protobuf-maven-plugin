@@ -103,7 +103,7 @@ public class MyMojo extends AbstractMojo {
 
     /**
      * Input directories that have *.protoc files (or the configured extension).
-     * If none specified then src/main/proto is used.
+     * If none specified then <b>src/main/protobuf</b> is used.
      * @parameter expression="${run.inputDirectories}"
      * @required
      */

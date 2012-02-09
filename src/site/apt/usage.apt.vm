@@ -31,7 +31,7 @@ Usage
    <<<pom.xml>>>. Default lifecycle phase is <<<generate-sources>>>. Also you
    should add protobuf library dependency to allow you module compile.
    
-   See the example
+   See the example that will look for
    
 +---+
 <dependencies>
