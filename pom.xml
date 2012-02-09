@@ -40,6 +40,19 @@
         <url>https://github.com/igor-petruk/protobuf-maven-plugin</url>
     </scm>
 
+    <issueManagement>
+        <system>Github</system>
+        <url>https://github.com/igor-petruk/protobuf-maven-plugin/issues</url>
+    </issueManagement>
+
+    <mailingLists>
+        <mailingList>
+            <name>Yet Another Protobuf Maven Plugin project mailing list</name>
+            <post>protobuf-maven-plugin@googlegroups.com</post>
+            <archive>http://groups.google.com/group/protobuf-maven-plugin</archive>
+        </mailingList>
+    </mailingLists>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.maven</groupId>
@@ -122,6 +135,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
                 <version>2.4</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-plugin</artifactId>
+                <version>2.5.1</version>
             </plugin>
         </plugins>
     </reporting>
