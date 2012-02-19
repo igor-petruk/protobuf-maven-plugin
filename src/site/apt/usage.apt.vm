@@ -58,3 +58,10 @@ Usage
 </build>
 +---+
   
+Troubleshooting
+ 
+* M2Eclipse and "Plugin execution not covered by lifecycle configuration"
+
+	Try to update to M2Eclipse 1.1 which is not yet released, but stable and available to install. 
+	Adding support for version 1.0 is quite complex and requires and extra project, it would make more sense to wait until 1.1 is released. 
+
