@@ -28,6 +28,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
+import org.sonatype.plexus.build.incremental.BuildContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -101,38 +102,41 @@ public class MyMojo extends AbstractMojo {
      */
     private DependencyTreeBuilder dependencyTreeBuilder;
 
+    /** @component */
+    private BuildContext buildContext;
+
     /**
      * Input directories that have *.protoc files (or the configured extension).
      * If none specified then <b>src/main/protobuf</b> is used.
-     * @parameter expression="${run.inputDirectories}"
+     * @parameter expression="${inputDirectories}"
      * @required
      */
     private File[] inputDirectories;
 
     /**
      * Should plugin add outputDirectory to sources that are going to be compiled
-     * @parameter expression="${run.addSources}" default-value="true"
+     * @parameter expression="${addSources}" default-value="true"
      * @required
      */
     private boolean addSources;
 
     /**
      * Output directory, that generated java files would be stored
-     * @parameter expression="${run.outputDirectory}" default-value="${project.build.directory}/generated-sources/protobuf"
+     * @parameter expression="${outputDirectory}" default-value="${project.build.directory}/generated-sources/protobuf"
      * @required
      */
     private File outputDirectory;
 
     /**
      * Default extension for protobuf files
-     * @parameter expression="${run.extension}" default-value=".proto"
+     * @parameter expression="${extension}" default-value=".proto"
      * @required
      */
     private String extension;
 
     /**
      * Setting to "true" disables version check between 'protoc' and the protobuf library used by module
-     * @parameter expression="${run.ignoreVersions}" default-value="false"
+     * @parameter expression="${ignoreVersions}" default-value="false"
      * @required
      */
     private boolean ignoreVersions;
@@ -175,11 +179,16 @@ public class MyMojo extends AbstractMojo {
             getLog().info("Directory "+input);
             File[] files = input.listFiles(PROTO_FILTER);
             for (File file: files){
-                processFile(file, outputDirectory);
+                if (buildContext.hasDelta(file.getPath())){
+                    processFile(file, outputDirectory);
+                }else{
+                    getLog().info("Not changed "+file);
+                }
             }
         }
         if (addSources){
             project.addCompileSourceRoot( outputDirectory.getAbsolutePath() );
+            buildContext.refresh(outputDirectory);
         }
     }
     
