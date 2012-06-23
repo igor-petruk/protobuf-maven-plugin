@@ -1,6 +1,24 @@
+#
+# ide meta data
+#
 *.ipr
 *.iws
 *.iml
+
+#
+# ide meta data
+#
+.project
+.classpath
+.settings/
+
+#
+# maven build
+#
 target
+
+#
+# maven release
+#
 *.releaseBackup
 release.properties
