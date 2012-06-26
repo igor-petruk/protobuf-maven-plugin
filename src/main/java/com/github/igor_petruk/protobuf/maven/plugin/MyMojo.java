@@ -43,9 +43,6 @@ import java.util.Scanner;
 public class MyMojo extends AbstractMojo {
 
     private static final String DEFAULT_INPUT_DIR= "/src/main/protobuf/".replace('/',File.separatorChar);
-    private static final String PROTOBUF_GROUPID="com.google.protobuf";
-    private static final String PROTOBUF_ARTIFACTID="protobuf-java";
-    private static final String PROTOC="protoc";
     private static final String VERSION_KEY="--version";
 
     /**
@@ -141,16 +138,37 @@ public class MyMojo extends AbstractMojo {
      */
     private boolean ignoreVersions;
 
+    /**
+     * This parameter allows to override the protoc command that is going to be used.
+     * @parameter expression="${protocCommand}" default-value="protoc"
+     */
+    private String protocCommand;
+
+    /**
+     * This parameter allows to override the protoc command that is going to be used.
+     * @parameter expression="${protobufGroupId}" default-value="com.google.protobuf"
+     */
+    private String protobufGroupId;
+
+    /**
+     * This parameter allows to override the protoc command that is going to be used.
+     * @parameter expression="${protobufArtifactId}" default-value="protobuf-java"
+     */
+    private String protobufArtifactId;
+
     public void execute() throws MojoExecutionException
     {
         String dependencyVersion = getProtobufVersion();
         getLog().info("Protobuf dependency version " + dependencyVersion);
         String executableVersion = detectProtobufVersion();
         if (executableVersion==null){
-            throw new MojoExecutionException("Unable to find '"+PROTOC+"'");
+            throw new MojoExecutionException("Unable to find '"+protocCommand+"'");
         }
         getLog().info("'protoc' executable version "+executableVersion);
         if (!ignoreVersions){
+            if (dependencyVersion==null){
+                throw new MojoExecutionException("Protobuf library dependency not found in pom: "+protobufGroupId+":" +protobufArtifactId);
+            }
             if (!dependencyVersion.startsWith(executableVersion)){
                 throw new MojoExecutionException("Protobuf installation version does not match Protobuf library version");
             }
@@ -197,7 +215,7 @@ public class MyMojo extends AbstractMojo {
         Runtime runtime = Runtime.getRuntime();
         try {
             Process process = runtime.exec(new String[]{
-                PROTOC,
+                    protocCommand,
                     "--proto_path="+file.getParentFile().getAbsolutePath(),
                     "--java_out="+outputDir,
                 file.toString()
@@ -237,7 +255,7 @@ public class MyMojo extends AbstractMojo {
         Runtime runtime = Runtime.getRuntime();
         try {
             Process process = runtime.exec(new String[]{
-                    PROTOC,VERSION_KEY});
+                    protocCommand,VERSION_KEY});
             Scanner scanner = new Scanner(process.getInputStream());
             String[] version = scanner.nextLine().split(" ");
             return version[1];
@@ -248,8 +266,8 @@ public class MyMojo extends AbstractMojo {
 
     private String traverseNode(DependencyNode node) {
         Artifact artifact = node.getArtifact();
-        if ((PROTOBUF_GROUPID.equals(artifact.getGroupId())
-        && (PROTOBUF_ARTIFACTID.equals(artifact.getArtifactId())))){
+        if ((protobufGroupId.equals(artifact.getGroupId())
+        && (protobufArtifactId.equals(artifact.getArtifactId())))){
             return artifact.getVersion();
         }
         for (Object o: node.getChildren()){
