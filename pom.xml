@@ -16,6 +16,7 @@
     <url>http://http://igor-petruk.github.com/protobuf-maven-plugin/</url>
     <properties>
         <mavenVersion>2.0.9</mavenVersion>
+        <javaVersion>1.6</javaVersion>
     </properties>
 
     <developers>
