@@ -145,13 +145,13 @@ public class MyMojo extends AbstractMojo {
     private String protocCommand;
 
     /**
-     * This parameter allows to override the protoc command that is going to be used.
+     * This parameter allows to override protobuf library groupId
      * @parameter expression="${protobufGroupId}" default-value="com.google.protobuf"
      */
     private String protobufGroupId;
 
     /**
-     * This parameter allows to override the protoc command that is going to be used.
+     * This parameter allows to override protobuf library artifactId
      * @parameter expression="${protobufArtifactId}" default-value="protobuf-java"
      */
     private String protobufArtifactId;
