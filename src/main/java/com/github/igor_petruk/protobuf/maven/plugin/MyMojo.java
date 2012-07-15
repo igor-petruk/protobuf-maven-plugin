@@ -158,6 +158,11 @@ public class MyMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException
     {
+        if (project.getPackaging()!=null &&
+                "pom".equals(project.getPackaging().toLowerCase())){
+            getLog().info("Skipping 'pom' packaged project");
+            return;
+        }
         String dependencyVersion = getProtobufVersion();
         getLog().info("Protobuf dependency version " + dependencyVersion);
         String executableVersion = detectProtobufVersion();
@@ -195,13 +200,20 @@ public class MyMojo extends AbstractMojo {
 
         for (File input: inputDirectories){
             getLog().info("Directory "+input);
-            File[] files = input.listFiles(PROTO_FILTER);
-            for (File file: files){
-                if (buildContext.hasDelta(file.getPath())){
-                    processFile(file, outputDirectory);
-                }else{
-                    getLog().info("Not changed "+file);
+            if (input.exists() && input.isDirectory()){
+                File[] files = input.listFiles(PROTO_FILTER);
+                for (File file: files){
+                    if (buildContext.hasDelta(file.getPath())){
+                        processFile(file, outputDirectory);
+                    }else{
+                        getLog().info("Not changed "+file);
+                    }
                 }
+            }else{
+                if (input.exists())
+                    getLog().warn(input+" is not a directory");
+                else
+                    getLog().warn(input+" does not exist");
             }
         }
         if (addSources){
