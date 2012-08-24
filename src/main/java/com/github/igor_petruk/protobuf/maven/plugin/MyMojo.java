@@ -32,7 +32,9 @@ import org.sonatype.plexus.build.incremental.BuildContext;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 /**
@@ -109,6 +111,12 @@ public class MyMojo extends AbstractMojo {
      * @required
      */
     private File[] inputDirectories;
+
+    /**
+     * This parameter lets you specify additional include paths to protoc.
+     * @parameter expression="${includeDirectories}"
+     */
+    private File[] includeDirectories;
 
     /**
      * Should plugin add outputDirectory to sources that are going to be compiled
@@ -195,6 +203,10 @@ public class MyMojo extends AbstractMojo {
         for (File input: inputDirectories){
             getLog().info("    "+input);
         }
+        getLog().info("Include directories:");
+        for (File include: includeDirectories){
+            getLog().info("    "+include);
+        }
         getLog().info("Output directory: "+outputDirectory);
         final ProtoFileFilter PROTO_FILTER = new ProtoFileFilter(extension);
 
@@ -225,13 +237,9 @@ public class MyMojo extends AbstractMojo {
     private void processFile(File file, File outputDir) throws MojoExecutionException{
         getLog().info("    Processing "+file.getName());
         Runtime runtime = Runtime.getRuntime();
+        Collection<String> cmd = buildCommand(file, outputDir);
         try {
-            Process process = runtime.exec(new String[]{
-                    protocCommand,
-                    "--proto_path="+file.getParentFile().getAbsolutePath(),
-                    "--java_out="+outputDir,
-                file.toString()
-            });
+            Process process = runtime.exec(cmd.toArray(new String[0]));
             int result = process.waitFor();
             if (result!=0){
                 Scanner scanner = new Scanner(process.getErrorStream());
@@ -244,6 +252,26 @@ public class MyMojo extends AbstractMojo {
             throw new MojoExecutionException("Interrupted",e);
         } catch (IOException e) {
             throw new MojoExecutionException("Unable to execute protoc for "+file, e);
+        }
+    }
+
+    private Collection<String> buildCommand(File file, File outputDir) throws MojoExecutionException {
+        Collection<String> cmd = new LinkedList<String>();
+        cmd.add(protocCommand);
+        populateIncludes(cmd);
+        cmd.add("-I" + file.getParentFile().getAbsolutePath());
+        cmd.add("--java_out=" + outputDir);
+        cmd.add(file.toString());
+        return cmd;
+    }
+
+    private void populateIncludes(Collection<String> args) throws MojoExecutionException {
+        for (File include : includeDirectories) {
+            if (!include.exists())
+                throw new MojoExecutionException("Include path '" + include.getPath() + "' does not exist");
+            if (!include.isDirectory())
+                throw new MojoExecutionException("Include path '" + include.getPath() + "' is not a directory");
+            args.add("-I" + include.getPath());
         }
     }
     
