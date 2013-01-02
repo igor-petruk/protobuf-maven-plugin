@@ -28,6 +28,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
+import org.codehaus.plexus.util.FileUtils;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
 import java.io.File;
@@ -117,6 +118,17 @@ public class RunMojo extends AbstractMojo {
     private File[] includeDirectories;
 
     /**
+     * If this parameter is set to "true" output folder is cleaned prior to build.
+     * This will not let old and new classes coexist after package or class
+     * rename in your IDE cache or after non-clean rebuild.
+     * Set this to "false" if you are doing multiple plugin invocations per build
+     * and it is important to preserve output folder contents
+     * @parameter expression="${cleanOutputFolder}" default-value="true"
+     * @required
+     */
+    private boolean cleanOutputFolder;
+
+    /**
      * Specifies a mode for plugin whether it should
      * add outputDirectory to sources that are going to be compiled
      * Can be "main", "test" or "none"
@@ -203,15 +215,6 @@ public class RunMojo extends AbstractMojo {
     }
 
     private void performProtoCompilation() throws MojoExecutionException{
-        File f = outputDirectory;
-        if ( !f.exists() )
-        {
-            f.mkdirs();
-        }
-        if (includeDirectories==null || inputDirectories.length==0){
-            File inputDir = new File(project.getBasedir().getAbsolutePath() + DEFAULT_INPUT_DIR);
-            inputDirectories = new File[]{inputDir};
-        }
         getLog().info("Input directories:");
         for (File input: inputDirectories){
             getLog().info("    "+input);
@@ -220,7 +223,27 @@ public class RunMojo extends AbstractMojo {
         for (File include: includeDirectories){
             getLog().info("    "+include);
         }
+        if (includeDirectories==null || inputDirectories.length==0){
+            File inputDir = new File(project.getBasedir().getAbsolutePath() + DEFAULT_INPUT_DIR);
+            inputDirectories = new File[]{inputDir};
+        }
+
         getLog().info("Output directory: "+outputDirectory);
+        File f = outputDirectory;
+        if ( !f.exists() )
+        {
+            getLog().info(f+" does not exist. Creating");
+            f.mkdirs();
+        }
+        if (cleanOutputFolder){
+            try {
+                getLog().info("Cleaning "+f);
+                FileUtils.cleanDirectory(f);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         final ProtoFileFilter PROTO_FILTER = new ProtoFileFilter(extension);
 
         for (File input: inputDirectories){
@@ -231,7 +254,7 @@ public class RunMojo extends AbstractMojo {
             if (input.exists() && input.isDirectory()){
                 File[] files = input.listFiles(PROTO_FILTER);
                 for (File file: files){
-                    if (buildContext.hasDelta(file.getPath())){
+                    if (cleanOutputFolder || buildContext.hasDelta(file.getPath())){
                         processFile(file, outputDirectory);
                     }else{
                         getLog().info("Not changed "+file);
