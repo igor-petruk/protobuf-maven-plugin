@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, Igor Petruk
+ * Copyright 2012, by Yet another Protobuf Maven Plugin Developers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
