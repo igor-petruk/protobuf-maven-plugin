@@ -124,6 +124,13 @@ public class RunMojo extends AbstractMojo {
     private boolean addSources;
 
     /**
+     * Should plugin add outputDirectory to test sources that are going to be compiled
+     * @parameter expression="${addTestSources}" default-value="false"
+     * @required
+     */
+    private boolean addTestSources;
+
+    /**
      * Output directory, that generated java files would be stored
      * @parameter expression="${outputDirectory}" default-value="${project.build.directory}/generated-sources/protobuf"
      * @required
@@ -231,6 +238,11 @@ public class RunMojo extends AbstractMojo {
         }
         if (addSources){
             project.addCompileSourceRoot( outputDirectory.getAbsolutePath() );
+        }
+        if (addTestSources){
+            project.addTestCompileSourceRoot( outputDirectory.getAbsolutePath() );
+        }
+        if (addSources || addTestSources){
             buildContext.refresh(outputDirectory);
         }
     }
