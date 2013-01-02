@@ -107,7 +107,6 @@ public class RunMojo extends AbstractMojo {
      * Input directories that have *.protoc files (or the configured extension).
      * If none specified then <b>src/main/protobuf</b> is used.
      * @parameter expression="${inputDirectories}"
-     * @required
      */
     private File[] inputDirectories;
 
@@ -194,7 +193,7 @@ public class RunMojo extends AbstractMojo {
         {
             f.mkdirs();
         }
-        if (inputDirectories.length==0){
+        if (includeDirectories==null || inputDirectories.length==0){
             File inputDir = new File(project.getBasedir().getAbsolutePath() + DEFAULT_INPUT_DIR);
             inputDirectories = new File[]{inputDir};
         }
@@ -210,6 +209,9 @@ public class RunMojo extends AbstractMojo {
         final ProtoFileFilter PROTO_FILTER = new ProtoFileFilter(extension);
 
         for (File input: inputDirectories){
+            if (input==null){
+                continue;
+            }
             getLog().info("Directory "+input);
             if (input.exists() && input.isDirectory()){
                 File[] files = input.listFiles(PROTO_FILTER);
