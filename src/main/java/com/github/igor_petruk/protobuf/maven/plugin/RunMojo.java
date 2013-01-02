@@ -1,7 +1,5 @@
-package com.github.igor_petruk.protobuf.maven.plugin;
-
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2012, Igor Petruk
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +13,8 @@ package com.github.igor_petruk.protobuf.maven.plugin;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.github.igor_petruk.protobuf.maven.plugin;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
@@ -32,7 +32,6 @@ import org.sonatype.plexus.build.incremental.BuildContext;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.Scanner;
 
 /**
@@ -40,7 +39,7 @@ import java.util.Scanner;
  * @phase generate-sources
  * @requiresDependencyResolution
  */
-public class MyMojo extends AbstractMojo {
+public class RunMojo extends AbstractMojo {
 
     private static final String DEFAULT_INPUT_DIR= "/src/main/protobuf/".replace('/',File.separatorChar);
     private static final String VERSION_KEY="--version";
