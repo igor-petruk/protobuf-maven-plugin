@@ -117,23 +117,20 @@ public class RunMojo extends AbstractMojo {
     private File[] includeDirectories;
 
     /**
-     * Should plugin add outputDirectory to sources that are going to be compiled
-     * @parameter expression="${addSources}" default-value="true"
+     * Specifies a mode for plugin whether it should
+     * add outputDirectory to sources that are going to be compiled
+     * Can be "main", "test" or "none"
+     * @parameter expression="${addSources}" default-value="main"
      * @required
      */
-    private boolean addSources;
-
-    /**
-     * Should plugin add outputDirectory to test sources that are going to be compiled
-     * @parameter expression="${addTestSources}" default-value="false"
-     * @required
-     */
-    private boolean addTestSources;
+    private String addSources;
 
     /**
      * Output directory, that generated java files would be stored
-     * @parameter expression="${outputDirectory}" default-value="${project.build.directory}/generated-sources/protobuf"
-     * @required
+     * Defaults to "${project.build.directory}/generated-sources/protobuf"
+     * or "${project.build.directory}/generated-test-sources/protobuf" depending
+     * addSources parameter
+     * @parameter expression="${outputDirectory}"
      */
     private File outputDirectory;
 
@@ -191,6 +188,17 @@ public class RunMojo extends AbstractMojo {
                 throw new MojoExecutionException("Protobuf installation version does not match Protobuf library version");
             }
         }
+        // Compatablity measures
+        addSources = addSources.toLowerCase().trim();
+        if ("true".equals(addSources)){
+            addSources = "main";
+        }
+
+        if (outputDirectory==null){
+            String subdir = "generated-"+("test".equals(addSources)?"test-":"")+"sources";
+            outputDirectory = new File(project.getBuild().getDirectory()+File.separator+subdir+File.separator);
+        }
+
         performProtoCompilation();
     }
 
@@ -236,13 +244,17 @@ public class RunMojo extends AbstractMojo {
                     getLog().warn(input+" does not exist");
             }
         }
-        if (addSources){
+        boolean mainAddSources = "main".endsWith(addSources);
+        boolean testAddSources = "test".endsWith(addSources);
+        if (mainAddSources){
+            getLog().info("Adding generated classes to classpath");
             project.addCompileSourceRoot( outputDirectory.getAbsolutePath() );
         }
-        if (addTestSources){
+        if (testAddSources){
+            getLog().info("Adding generated classes to test classpath");
             project.addTestCompileSourceRoot( outputDirectory.getAbsolutePath() );
         }
-        if (addSources || addTestSources){
+        if (mainAddSources || testAddSources){
             buildContext.refresh(outputDirectory);
         }
     }
