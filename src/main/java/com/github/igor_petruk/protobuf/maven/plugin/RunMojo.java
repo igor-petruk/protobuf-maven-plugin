@@ -288,13 +288,8 @@ public class RunMojo extends AbstractMojo {
         Collection<String> cmd = buildCommand(file, outputDir);
         try {
             Process process = runtime.exec(cmd.toArray(new String[0]));
-            int result = process.waitFor();
-            if (result!=0){
-                Scanner scanner = new Scanner(process.getErrorStream());
-                while (scanner.hasNextLine()){
-                    getLog().info("    " + scanner.nextLine());
-                }
-                throw new MojoExecutionException("'protoc' failed for "+file+". Exit code "+result);
+            if (process.waitFor() != 0) {
+                printErrorAndThrow(process, " for " + file);
             }
         }catch (InterruptedException e){
             throw new MojoExecutionException("Interrupted",e);
@@ -322,7 +317,7 @@ public class RunMojo extends AbstractMojo {
             args.add("-I" + include.getPath());
         }
     }
-    
+
     private String getProtobufVersion() throws MojoExecutionException{
         try {
             ArtifactFilter artifactFilter = null;
@@ -336,20 +331,45 @@ public class RunMojo extends AbstractMojo {
 
         } catch (DependencyTreeBuilderException e) {
             throw new MojoExecutionException("Unable to traverse dependency tree", e);
-        }        
-    }
-    
-    private String detectProtobufVersion() throws MojoExecutionException{
-        Runtime runtime = Runtime.getRuntime();
-        try {
-            Process process = runtime.exec(new String[]{
-                    protocCommand,VERSION_KEY});
-            Scanner scanner = new Scanner(process.getInputStream());
-            String[] version = scanner.nextLine().split(" ");
-            return version[1];
-        } catch (IOException e) {
-            return null;
         }
+    }
+
+    private String detectProtobufVersion() throws MojoExecutionException {
+        try {
+            Runtime runtime = Runtime.getRuntime();
+            Process process = runtime.exec(protocVersionCommand());
+
+            if (process.waitFor() != 0) {
+                printErrorAndThrow(process);
+            } else {
+                Scanner scanner = new Scanner(process.getInputStream());
+                String[] version = scanner.nextLine().split(" ");
+                return version[1];
+            }
+        } catch (IOException e) {
+            throw new MojoExecutionException("Cannot execute '" + protocCommand + "'", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        return null;
+    }
+
+    private String[] protocVersionCommand() {
+        return new String[]{protocCommand, VERSION_KEY};
+    }
+
+    private void printErrorAndThrow(Process process, String exceptionMessage) throws MojoExecutionException {
+        Scanner scanner = new Scanner(process.getErrorStream());
+        while (scanner.hasNextLine()) {
+            getLog().error("    " + scanner.nextLine());
+        }
+
+        throw new MojoExecutionException("'protoc' failed" + exceptionMessage + ". Exit code " + process.exitValue());
+    }
+
+    private void printErrorAndThrow(Process process) throws MojoExecutionException {
+        printErrorAndThrow(process, "");
     }
 
     private String traverseNode(DependencyNode node) {
