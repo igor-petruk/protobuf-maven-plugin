@@ -216,16 +216,19 @@ public class RunMojo extends AbstractMojo {
     }
 
     private void performProtoCompilation() throws MojoExecutionException{
+        if (includeDirectories!=null && includeDirectories.length>0){
+            getLog().info("Include directories:");
+            for (File include: includeDirectories){
+                getLog().info("    "+include);
+            }
+        }
         getLog().info("Input directories:");
         for (File input: inputDirectories){
             getLog().info("    "+input);
         }
-        getLog().info("Include directories:");
-        for (File include: includeDirectories){
-            getLog().info("    "+include);
-        }
         if (includeDirectories==null || inputDirectories.length==0){
             File inputDir = new File(project.getBasedir().getAbsolutePath() + DEFAULT_INPUT_DIR);
+            getLog().info("    "+inputDir+" (using default)");
             inputDirectories = new File[]{inputDir};
         }
 
@@ -233,7 +236,7 @@ public class RunMojo extends AbstractMojo {
         File f = outputDirectory;
         if ( !f.exists() )
         {
-            getLog().info(f+" does not exist. Creating");
+            getLog().info(f+" does not exist. Creating...");
             f.mkdirs();
         }
         if (cleanOutputFolder){
