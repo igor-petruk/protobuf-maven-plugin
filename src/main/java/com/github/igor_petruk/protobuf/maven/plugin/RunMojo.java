@@ -46,6 +46,7 @@ public class RunMojo extends AbstractMojo {
 
     private static final String DEFAULT_INPUT_DIR= "/src/main/protobuf/".replace('/',File.separatorChar);
     private static final String VERSION_KEY="--version";
+    private static final int VALID_VERSION_EXIT_CODE=1;
 
     /**
      * The Maven project.
@@ -339,7 +340,7 @@ public class RunMojo extends AbstractMojo {
             Runtime runtime = Runtime.getRuntime();
             Process process = runtime.exec(protocVersionCommand());
 
-            if (process.waitFor() != 0) {
+            if (process.waitFor() != VALID_VERSION_EXIT_CODE) {
                 printErrorAndThrow(process);
             } else {
                 Scanner scanner = new Scanner(process.getInputStream());
