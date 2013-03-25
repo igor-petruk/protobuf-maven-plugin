@@ -11,9 +11,9 @@
     <artifactId>protobuf-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
     <version>0.6.4-SNAPSHOT</version>
-    <name>Once Again Maven Protobuf Plugin</name>
+    <name>Maven Protobuf Plugin</name>
     <description>Maven Plugin to compile Google Protobuf Messsage files</description>
-    <url>http://http://igor-petruk.github.com/protobuf-maven-plugin/</url>
+    <url>http://igor-petruk.github.com/protobuf-maven-plugin/</url>
     <properties>
         <mavenVersion>2.0.9</mavenVersion>
         <javaVersion>1.6</javaVersion>
@@ -48,7 +48,7 @@
 
     <mailingLists>
         <mailingList>
-            <name>Yet Another Protobuf Maven Plugin project mailing list</name>
+            <name>Protobuf Maven Plugin project mailing list</name>
             <post>protobuf-maven-plugin@googlegroups.com</post>
             <archive>http://groups.google.com/group/protobuf-maven-plugin</archive>
         </mailingList>
