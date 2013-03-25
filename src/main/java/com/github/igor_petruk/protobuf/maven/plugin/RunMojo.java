@@ -22,6 +22,7 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -46,7 +47,6 @@ public class RunMojo extends AbstractMojo {
 
     private static final String DEFAULT_INPUT_DIR= "/src/main/protobuf/".replace('/',File.separatorChar);
     private static final String VERSION_KEY="--version";
-    private static final int VALID_VERSION_EXIT_CODE=1;
 
     /**
      * The Maven project.
@@ -188,7 +188,7 @@ public class RunMojo extends AbstractMojo {
         }
         String dependencyVersion = getProtobufVersion();
         getLog().info("Protobuf dependency version " + dependencyVersion);
-        String executableVersion = detectProtobufVersion();
+        String executableVersion = detectProtobufVersion(dependencyVersion);
         if (executableVersion==null){
             throw new MojoExecutionException("Unable to find '"+protocCommand+"'");
         }
@@ -338,12 +338,23 @@ public class RunMojo extends AbstractMojo {
         }
     }
 
-    private String detectProtobufVersion() throws MojoExecutionException {
+    private int getValidVersionExitCode(String libraryVersionString) throws MojoExecutionException{
+        DefaultArtifactVersion libraryVersion = new DefaultArtifactVersion(libraryVersionString);
+        // Since this version protoc is properly returning 0 on successful run
+        DefaultArtifactVersion newerVersion = new DefaultArtifactVersion("2.5.0");
+        if (newerVersion.compareTo(libraryVersion)>0){
+            return 1;
+        }else{
+            return 0;
+        }
+    }
+
+    private String detectProtobufVersion(String libraryVersion) throws MojoExecutionException {
         try {
             Runtime runtime = Runtime.getRuntime();
             Process process = runtime.exec(protocVersionCommand());
 
-            if (process.waitFor() != VALID_VERSION_EXIT_CODE) {
+            if (process.waitFor() != getValidVersionExitCode(libraryVersion)) {
                 printErrorAndThrow(process);
             } else {
                 Scanner scanner = new Scanner(process.getInputStream());
