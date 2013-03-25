@@ -45,7 +45,7 @@ Usage
 		<plugin>
 			<groupId>com.github.igor-petruk.protobuf</groupId>
 			<artifactId>protobuf-maven-plugin</artifactId>
-			<version>0.5.1</version>
+			<version>0.6.3</version>
 			<executions>
 				<execution>
 					<goals>

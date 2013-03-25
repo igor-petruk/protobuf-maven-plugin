@@ -21,7 +21,7 @@
   Igor Petruk
   ------
 
-Yet another protobuf plugin
+Maven protobuf plugin
 
   This plugin adds support of compilation of Google Protobuf files with maven during the build.
   
