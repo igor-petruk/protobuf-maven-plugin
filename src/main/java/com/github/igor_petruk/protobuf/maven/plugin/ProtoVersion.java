@@ -55,8 +55,6 @@ public class ProtoVersion {
             throw new MojoExecutionException("Unrecognized protobuf version: "
                     + version);
         }
-        
-        System.out.println(this.toString());
     }
 
     public String getMajor() {
