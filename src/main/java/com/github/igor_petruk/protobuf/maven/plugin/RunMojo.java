@@ -52,7 +52,7 @@ public class RunMojo extends AbstractMojo {
      * The Maven project.
      *
      * @parameter expression="${project}"
-     * @requirede
+     * @required
      * @readonly
      */
     private MavenProject project;
