@@ -32,6 +32,8 @@ import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
 import org.codehaus.plexus.util.FileUtils;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
+import com.github.igor_petruk.protobuf.maven.plugin.ProtoVersion.VersionValidationStrategy;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -178,6 +180,22 @@ public class RunMojo extends AbstractMojo {
      * @parameter expression="${protobufArtifactId}" default-value="protobuf-java"
      */
     private String protobufArtifactId;
+    
+    /**
+     * This parameter allows to specify how to validate the protobuf version.
+     * <ul>
+     * <li>
+     * major: Only validate the major part. If the major parts of two versions
+     * are same, they pass the validation.</li>
+     * <li>minor: Validate the major and minor parts. If the major and minor
+     * parts of two versions are same, they pass the validation.</li>
+     * <li>all: Validate if two versions are same.</li>
+     * </ul>
+     * 
+     * @parameter expression="${protobufVersionValidationStrategy}"
+     *            default-value="minor"
+     */
+    private String protobufVersionValidationStrategy;
 
     public void execute() throws MojoExecutionException
     {
@@ -197,7 +215,10 @@ public class RunMojo extends AbstractMojo {
             if (dependencyVersion==null){
                 throw new MojoExecutionException("Protobuf library dependency not found in pom: "+protobufGroupId+":" +protobufArtifactId);
             }
-            if (!dependencyVersion.startsWith(executableVersion)){
+            VersionValidationStrategy strategy = VersionValidationStrategy
+                    .fromString(protobufVersionValidationStrategy);
+            if (!ProtoVersion.validate(strategy, new ProtoVersion(
+                    dependencyVersion), new ProtoVersion(executableVersion))) {
                 throw new MojoExecutionException("Protobuf installation version does not match Protobuf library version");
             }
         }
