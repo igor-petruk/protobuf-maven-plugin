@@ -172,17 +172,17 @@ public class RunMojo extends AbstractMojo {
 
     /**
      * Setting to "true" allows protoc to output as java.
-     * @parameter expression="${javaOuput}" default-value="true"
+     * @parameter expression="${javaOutput}" default-value="true"
      * @required
      */
-    private boolean javaOuput;
+    private boolean javaOutput;
 
     /**
      * Setting to "true" allows protoc to output as python.
-     * @parameter expression="${pythonOuput}" default-value="false"
+     * @parameter expression="${pythonOutput}" default-value="false"
      * @required
      */
-    private boolean pythonOuput;
+    private boolean pythonOutput;
 
     /**
      * This parameter allows to override the protoc command that is going to be used.
@@ -349,11 +349,11 @@ public class RunMojo extends AbstractMojo {
         cmd.add(protocCommand);
         populateIncludes(cmd);
         cmd.add("-I" + file.getParentFile().getAbsolutePath());
-        if (javaOuput)
+        if (javaOutput)
             cmd.add("--java_out=" + outputDir);
         if (cppOutput)
             cmd.add("--cpp_out=" + outputDir);
-        if (pythonOuput)
+        if (pythonOutput)
             cmd.add("--python_out=" + outputDir);
         cmd.add(file.toString());
         return cmd;
